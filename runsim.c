@@ -7,103 +7,76 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <stdbool.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <errno.h>
+
+#define MAX_CANON 20
+
+void docommand(char *cline);
 
 void print_usage(char *argv[]){
 	fprintf(stderr, "Usage: %s [number of processes]\n", argv[0]);
 }
 
-bool isNumber(char number[]){
-	int i = 0;
-	if(number[0]=='-')
-		i=1;
-	for(; number[i]!=0; i++){
-		if(!isdigit(number[i]))
-			return false;
-	}
-	return true;
+void docommand(char *cline){
+	//fork a child (a grandchild of the original), Grandchild calls makeargv on cline and calls execvp on the resulting array
+	pid_t grchildpid = 0;
+	//child forks grandchild to execute command
+	//runsim checks to see if any of the children have finished waitpid with WNOHANG option) and when that happens it returnlicense
+	grchildpid=fork();
+	system(cline);
+	//wait for this child and then return license to the license object
 }
 
 int main (int argc, char *argv[]) {
 	pid_t childpid = 0;
 	pid_t wpid = 0;
- 	int i, n, option, pr_limit, status;
-	int hflag = 0;
-	int nflag = 0;
-	int pr_count=0;
+	int pr_limit;//specifies the maximum number of children allowed to execute at a time (int value passed in on cmd line)
+	int status, child;
 
-	while ((option = getopt(argc, argv, "hn"))!=-1){
-		switch(option){
-			case 'h':
-				hflag = 1;
-				break;
-			case 'n':
-				nflag = 1;
-				break;
-			default:
-				hflag = 1;
-				break;
-		}
-	}
-
-	if((hflag==1) && (nflag==0)){
-		print_usage(argv);
-		return 0;
-	}
-	else if((nflag==1) && (hflag==0)){
-		if(argv[2]!=NULL && ((pr_limit=atoi(argv[2]))>0)){
-			char program[20];
-			char params[20];
-			FILE *fp = fopen("testing.data", "r");
-			if(fp==NULL){
-				perror("Error opening file: ");
-				return 0;
-			}
-			while(fgets(params, 20, fp)!=NULL){
-				if(pr_count == pr_limit){
-					wait(NULL);
-					pr_count--;
-				}
-				strcpy(program, "./");
-				strcat(program, params);
-				if((childpid = fork()) <=0){
-					//printf("forking process....");
-					printf("%s, %s", program, params);
-					system(program);
-					return 0;
-				}
-				pr_count++;
-			}
-			fclose(fp);
-			while(wpid=wait(&status)>0){
-				printf("%s: All children terminated.\n", argv[0]);
-				return 0;
-			}
-		}
-		else {
-			printf("%s: ERROR: invalid option selection\n", argv[0]);
-			print_usage(argv);
-			return 0;
-		}
-		return 0;
-	}
- 	/*
 	//error checking for number argument doesn't work 
-	if (argc != 2){  check for valid number of command-line arguments 
-		if (!isNumber(argv[1])) {
-			print_usage(argv);
- 			return 1;
-		}
+	if (argc != 2){  //check for valid number of command-line arguments 
+		print_usage(argv);
+ 		return 1;
  	}
  
-	n = atoi(argv[1]);
-	for (i = 1; i < n; i++)
-		if ((childpid = fork()) <= 0)
+	pr_limit = atoi(argv[1]);
+	if(pr_limit>0){
+		int pr_count=0;//number of children
+		char buffer[MAX_CANON];
+		while(fgets(buffer, MAX_CANON, stdin)!=NULL){
+			//request a license from the license object
+			//fork a child that calls docommand
+			if((childpid=fork())<=0){
+				pr_count++;
+				return 0;
+			}
+			//waits for a child process to finish if the limit is reached
+			//if(pr_count == pr_limit){
+			if((wpid=waitpid(-1,NULL, WNOHANG)!=0)){
+				wait(NULL);
+				pr_count--;
+			}
+			//pass the input string from stdin to docommand which will execl the command (child)
+			char progstr[20];
+			strcpy(progstr, "./");
+			strcat(progstr, buffer);
+			docommand(progstr);
+		}
+		//After EOF on stdin, wait for all the remaining children to finish and then exit
+		/*
+		while((wpid=wait(&status))>0){
+			printf("Child Terminated.\n");
+		}
+		*/
+		while(1){
+			child = wait(NULL);
+
+			if ((child == -1) && (errno != EINTR)){
 			break;
-	fprintf(stderr, "i:%d process ID:%ld parent ID:%ld child ID:%ld\n",
-		i, (long)getpid(), (long)getppid(), (long)childpid);
+			}
+		}
+	}
 	return 0;
-	*/
 }
