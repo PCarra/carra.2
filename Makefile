@@ -7,8 +7,10 @@
 
 target1 = runsim
 target2 = testsim
+target3 = licenseobj
 objs1 = runsim.o
 objs2 = testsim.o
+objs3 = licenseobj.o
 deps = $(patsubst %.o,%.h,$(objs))
 -include $(deps)
 DEPFLAGS = -MMD -MF $(@:.o=.h)
@@ -24,6 +26,8 @@ $(target1): $(objs1)
 $(target2): $(objs2)
 	$(CC) $(CFLAGS) -o $@ $^
 
+$(target3): $(objs3)
+	$(CC) $(CFLAGS) -o $@ $^
 #%.o: %.c
 	#$(CC) $(CFLAGS) -c $< $(DEPFLAGS)
 clean:
