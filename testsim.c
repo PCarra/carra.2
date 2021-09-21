@@ -15,10 +15,9 @@ int main(int argc, char *argv[]) {
 	    fprintf(stderr, "Usage: %s sleep_time repeat_factor\n", argv[1]);
 	    exit(1);
     }
-    int i = 0;
-    for (i=1; i<=repeat_factor; i++) {
-        //sleep(sleep_time);
-	fprintf(stderr, "Process ID: %d is sleeping \n", getpid());
+    while(repeat_factor-- > 0){
+	    sleep(sleep_time);
     }
-    return 0;
+    printf("Process ID = %d \n", getpid());
+    return sleep_time;
 }

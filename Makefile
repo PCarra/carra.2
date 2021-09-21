@@ -8,9 +8,9 @@
 target1 = runsim
 target2 = testsim
 target3 = licenseobj
-objs1 = runsim.o
+objs1 = runsim.o licenseobj.h licenseobj.c
 objs2 = testsim.o
-objs3 = licenseobj.o
+objs3 = licenseobj.o licenseobj.h
 deps = $(patsubst %.o,%.h,$(objs))
 -include $(deps)
 DEPFLAGS = -MMD -MF $(@:.o=.h)

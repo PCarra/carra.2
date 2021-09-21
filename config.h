@@ -1,2 +1,2 @@
 #define NUM_PROCESSES 20
-#define MAX_SECONDS 1
+#define MAX_SECONDS 100 

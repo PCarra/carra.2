@@ -1,44 +1,55 @@
 //License object
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-class License {
-	public:
-		int nlicenses; 
-		int getlicense(void);
-		int returnlicense(void);
-		int initlicense(void);
-		addtolicenses(int n);
-		removelicenses(int n);
-		logmsg(const char * msg);
-	private:
+
+
+extern int *nlicenses;
+
+struct License {
+	int nlicenses;
+};
+
+int getlicense(void){
+	//Blocks until a license is available
+	if(nlicenses>0){
+		nlicenses--;
+	}
+	else{
+		wait(nlicenses);
+		return 0;
+	}
+	return 0;
 }
 
+int returnlicense(void){
+	//Increments the number of available licenses
+	nlicenses++;
+	return 0;
+}
 
-class License : Public License {
-	public:
-		int getlicense(void){
-			//Blocks until a license is available
-			return 0;
-		}
-		int returnlicense(void){
-			//Increments the number of available licenses
-			return 0;
-		}
-		int initlicense(void){
-			//Performs any needed initialization of the license object
-			return 0;
-		}
-		addtolicenses(int n){
-			//Adds n licenses to the number available
-			return 0;
-		}
-		removelicenses(int n){
-			//Decrements the number of licenses by n
-			return 0;
-		}
-		logmsg(const char * msg){
-			//Write the specified message to the log file.  There is only one log file.
-			//This functino will treat the log file as a critical resource.  Append the message and close the file.
-			return 0;
-		}
-	private:
-};
+int initlicense(void){
+	//Performs any needed initialization of the license object
+	return 0;
+}
+
+int addtolicenses(int n){
+	//Adds n licenses to the number available
+	nlicenses+=n;
+	return 0;
+}
+
+int removelicenses(int n){
+	//Decrements the number of licenses by n
+	nlicenses-=n;
+	return 0;
+}
+
+int logmsg(const char * msg){
+	//Write the specified message to the log file.  There is only one log file.
+	//This functino will treat the log file as a critical resource.  Append the message and close the file.
+	return 0;
+}
