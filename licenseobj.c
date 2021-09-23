@@ -4,14 +4,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "licenseobj.h"
 
 
 
 extern int *nlicenses;
 
-struct License {
-	int nlicenses;
-};
 
 int getlicense(void){
 	//Blocks until a license is available
@@ -31,8 +29,9 @@ int returnlicense(void){
 	return 0;
 }
 
-int initlicense(void){
+int initlicense(int number){
 	//Performs any needed initialization of the license object
+	*nlicenses = number;
 	return 0;
 }
 
